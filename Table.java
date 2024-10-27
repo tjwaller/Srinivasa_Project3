@@ -67,12 +67,16 @@ public class Table
 
     /** The supported map types.
      */
-    private enum MapType { NO_MAP, TREE_MAP, HASH_MAP, LINHASH_MAP, BPTREE_MAP }
-
+    //private enum MapType { NO_MAP, TREE_MAP, HASH_MAP, LINHASH_MAP, BPTREE_MAP }
+    public enum MapType { NO_MAP, TREE_MAP, HASH_MAP, LINHASH_MAP, BPTREE_MAP }
+    
     /** The map type to be used for indices.  Change as needed.
      */
-    private static final MapType mType = MapType.NO_MAP;
-
+    private static MapType mType = MapType.NO_MAP;
+    public static void setMapType(MapType mapType) {
+        mType = mapType;
+    }
+    
     /************************************************************************************
      * Make a map (index) given the MapType.
      */
@@ -82,7 +86,7 @@ public class Table
         case NO_MAP      -> null;
         case TREE_MAP    -> new TreeMap <> ();
         case HASH_MAP    -> new HashMap <> ();
-        case LINHASH_MAP -> new LinHashMap <> (KeyType.class, Comparable [].class);
+        //case LINHASH_MAP -> new LinHashMap <> (KeyType.class, Comparable [].class);
         case BPTREE_MAP  -> new BpTreeMap <> (KeyType.class, Comparable [].class);
         default          -> null;
         }; // switch
@@ -215,22 +219,22 @@ public class Table
      * @param condition  the check condition as a string for tuples
      * @return  a table with tuples satisfying the condition
      */
-    public Table select (String condition)
-    {
-        out.println (STR."RA> \{name}.select (\{condition})");
-
-        List <Comparable []> rows = new ArrayList <> ();
-
-        //  T O   B E   I M P L E M E N T E D
-
-        var token = condition.split (" ");
-        var colNo = col (token [0]);
+    public Table select(String condition) {
+        out.println("RA> " + name + ".select(" + condition + ")");
+    
+        List<Comparable[]> rows = new ArrayList<>();
+    
+        var token = condition.split(" ");
+        var colNo = col(token[0]); // Make sure col() method is implemented to return the correct column index
         for (var t : tuples) {
-            if (satifies (t, colNo, token [1], token [2])) rows.add (t);
+            if (satifies(t, colNo, token[1], token[2])) { // Ensure satisfies() method is implemented correctly
+                rows.add(t);
+            }
         } // for
-
-        return new Table (name + count++, attribute, domain, key, rows);
+    
+        return new Table(name + count++, attribute, domain, key, rows);
     } // select
+    
 
     /************************************************************************************
      * Does tuple t satify the condition t[colNo] op value where op is ==, !=, <, <=, >, >=?
@@ -245,7 +249,7 @@ public class Table
     private boolean satifies (Comparable [] t, int colNo, String op, String value)
     {
         var t_A = t[colNo];
-        out.println (STR."satisfies: \{t_A} \{op} \{value}");
+        //out.println (STR."satisfies: \{t_A} \{op} \{value}");
         var valt = switch (domain [colNo].getSimpleName ()) {      // type converted
         case "Byte"      -> Byte.valueOf (value);
         case "Character" -> value.charAt (0);
@@ -282,7 +286,7 @@ public class Table
         out.println (STR."RA> \{name}.select (\{keyVal})");
 
         List <Comparable []> rows = new ArrayList <> ();
-
+        
         //  T O   B E   I M P L E M E N T E D  - Project 2
 
         return new Table (name + count++, attribute, domain, key, rows);
