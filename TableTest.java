@@ -1,3 +1,4 @@
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -54,14 +55,22 @@ public class TableTest {
             // Test the join method and log the performance
             System.out.println("\nTesting: join(Table table2)");
             testJoinMethod(table1, table2);
+
+            // Test the select by key method and log the performance
+            System.out.println("\nTesting: select(KeyType keyVal)");
+            Integer testKeyVal = 1; // Example key to use in select by key
+            testSelectByKeyMethod(table1, testKeyVal);
+
         }
     }
+        
 
     /**
      * Tests the select(String condition) method of the Table class.
      * @param table the Table instance to test
      * @param condition the condition for the select method
      */
+    
     private static void testSelectMethod(Table table, String condition) {
         int iterations = 5;
         long totalTime = 0;
@@ -78,10 +87,47 @@ public class TableTest {
     }
 
     /**
+     * Tests the select(KeyType keyVal) method of the Table class.
+     * @param table the Table instance to test
+     * @param intKeyVal the Integer key value for testing select by key
+     */
+    private static void testSelectByKeyMethod(Table table, Integer intKeyVal) {
+        int iterations = 5;
+        long totalTime = 0;
+
+        // Convert Integer to KeyType (or cast as necessary for KeyType compatibility)
+        KeyType keyVal = createKeyType(intKeyVal);
+
+        for (int i = 0; i < iterations + 1; i++) {
+            long startTime = System.nanoTime();
+            table.select(keyVal);
+            long endTime = System.nanoTime();
+            if (i > 0) {
+                totalTime += (endTime - startTime);
+            }
+        }
+        long averageTime = totalTime / iterations;
+        System.out.println("Average time for select by key with key " + intKeyVal + " on " + table.getName() + ": " + averageTime + " ns");
+    }
+
+      /**
+     * Helper method to create a KeyType from an Integer.
+     * Adjust this method if KeyType has a different constructor or if a cast is required.
+     * @param intKeyVal the integer value to convert to KeyType
+     * @return a KeyType instance representing the integer key value
+     */
+    private static KeyType createKeyType(Integer intKeyVal) {
+        // Replace this with appropriate conversion or casting if necessary
+        return new KeyType(intKeyVal);  // Assuming KeyType has a constructor taking Integer
+    }
+        
+
+    /**
      * Tests the join(Table table2) method of the Table class.
      * @param table1 the first Table instance to join
      * @param table2 the second Table instance to join with
      */
+    
     private static void testJoinMethod(Table table1, Table table2) {
         int iterations = 5;
         long totalTime = 0;
@@ -102,6 +148,7 @@ public class TableTest {
      * @param domainStrings the string representations of types
      * @return an array of Class<?> corresponding to the domainStrings
      */
+    
     private static Class<?>[] convertDomain(String[] domainStrings) {
         HashMap<String, Class<?>> typeMap = new HashMap<>();
         typeMap.put("Integer", Integer.class);
@@ -115,3 +162,5 @@ public class TableTest {
         return domain;
     }
 }
+
+

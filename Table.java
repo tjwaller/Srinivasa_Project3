@@ -281,15 +281,21 @@ public class Table
      * @param keyVal  the given key value
      * @return  a table with the tuple satisfying the key predicate
      */
-    public Table select (KeyType keyVal)
-    {
-        out.println (STR."RA> \{name}.select (\{keyVal})");
+    public Table select(KeyType keyVal) {
+        out.println(STR."RA> \{name}.select (\{keyVal})");
 
-        List <Comparable []> rows = new ArrayList <> ();
-        
-        //  T O   B E   I M P L E M E N T E D  - Project 2
+        List<Comparable[]> rows = new ArrayList<>();
 
-        return new Table (name + count++, attribute, domain, key, rows);
+        if (index == null) {
+            out.println("Index is null, cannot perform indexed select.");
+        } else {
+            Comparable[] row = index.get(keyVal);
+            if (row != null) {
+                rows.add(row);
+            }
+        }
+
+        return new Table(name + count++, attribute, domain, key, rows);
     } // select
 
     /************************************************************************************
