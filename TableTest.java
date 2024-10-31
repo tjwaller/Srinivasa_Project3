@@ -24,7 +24,7 @@ public class TableTest {
         tupleGenerator.addRelSchema("TestTable1", attribute, domainStrings, key, new String[][]{});
         tupleGenerator.addRelSchema("TestTable2", attribute, domainStrings, key, new String[][]{});
 
-        int numberOfTuples = 1000;
+        int numberOfTuples = 10000;
         Comparable[][] generatedTuples1 = tupleGenerator.generate(new int[]{numberOfTuples})[0];
         Comparable[][] generatedTuples2 = tupleGenerator.generate(new int[]{numberOfTuples})[0];
 
