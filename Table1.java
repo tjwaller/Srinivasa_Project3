@@ -67,16 +67,12 @@ public class Table
 
     /** The supported map types.
      */
-    //private enum MapType { NO_MAP, TREE_MAP, HASH_MAP, LINHASH_MAP, BPTREE_MAP }
-    public enum MapType { NO_MAP, TREE_MAP, HASH_MAP, LINHASH_MAP, BPTREE_MAP }
-    
+    private enum MapType { NO_MAP, TREE_MAP, HASH_MAP, LINHASH_MAP, BPTREE_MAP }
+
     /** The map type to be used for indices.  Change as needed.
      */
-    private static MapType mType = MapType.NO_MAP;
-    public static void setMapType(MapType mapType) {
-        mType = mapType;
-    }
-    
+    private static final MapType mType = MapType.NO_MAP;
+
     /************************************************************************************
      * Make a map (index) given the MapType.
      */
@@ -86,7 +82,7 @@ public class Table
         case NO_MAP      -> null;
         case TREE_MAP    -> new TreeMap <> ();
         case HASH_MAP    -> new HashMap <> ();
-        //case LINHASH_MAP -> new LinHashMap <> (KeyType.class, Comparable [].class);
+        case LINHASH_MAP -> new LinHashMap <> (KeyType.class, Comparable [].class);
         case BPTREE_MAP  -> new BpTreeMap <> (KeyType.class, Comparable [].class);
         default          -> null;
         }; // switch
@@ -163,7 +159,7 @@ public class Table
     {
         this (_name, attributes.split (" "), findClass (domains.split (" ")), _key.split(" "));
 
-        out.println ("DDL> create table \{name} (\{attributes})");
+        out.println (STR."DDL> create table \{name} (\{attributes})");
     } // constructor
 
     //----------------------------------------------------------------------------------
@@ -203,7 +199,7 @@ public class Table
      */
     public Table select (Predicate <Comparable []> predicate)
     {
-        out.println ("RA> \{name}.select (\{predicate})");
+        out.println (STR."RA> \{name}.select (\{predicate})");
 
         return new Table (name + count++, attribute, domain, key,
                    tuples.stream ().filter (t -> predicate.test (t))
@@ -219,22 +215,22 @@ public class Table
      * @param condition  the check condition as a string for tuples
      * @return  a table with tuples satisfying the condition
      */
-    public Table select(String condition) {
-        out.println("RA> " + name + ".select(" + condition + ")");
-    
-        List<Comparable[]> rows = new ArrayList<>();
-    
-        var token = condition.split(" ");
-        var colNo = col(token[0]); // Make sure col() method is implemented to return the correct column index
+    public Table select (String condition)
+    {
+        out.println (STR."RA> \{name}.select (\{condition})");
+
+        List <Comparable []> rows = new ArrayList <> ();
+
+        //  T O   B E   I M P L E M E N T E D
+
+        var token = condition.split (" ");
+        var colNo = col (token [0]);
         for (var t : tuples) {
-            if (satifies(t, colNo, token[1], token[2])) { // Ensure satisfies() method is implemented correctly
-                rows.add(t);
-            }
+            if (satifies (t, colNo, token [1], token [2])) rows.add (t);
         } // for
-    
-        return new Table(name + count++, attribute, domain, key, rows);
+
+        return new Table (name + count++, attribute, domain, key, rows);
     } // select
-    
 
     /************************************************************************************
      * Does tuple t satify the condition t[colNo] op value where op is ==, !=, <, <=, >, >=?
@@ -249,7 +245,7 @@ public class Table
     private boolean satifies (Comparable [] t, int colNo, String op, String value)
     {
         var t_A = t[colNo];
-        //out.println ("satisfies: \{t_A} \{op} \{value}");
+        out.println (STR."satisfies: \{t_A} \{op} \{value}");
         var valt = switch (domain [colNo].getSimpleName ()) {      // type converted
         case "Byte"      -> Byte.valueOf (value);
         case "Character" -> value.charAt (0);
@@ -281,21 +277,15 @@ public class Table
      * @param keyVal  the given key value
      * @return  a table with the tuple satisfying the key predicate
      */
-    public Table select(KeyType keyVal) {
-        out.println("RA> \{name}.select (\{keyVal})");
+    public Table select (KeyType keyVal)
+    {
+        out.println (STR."RA> \{name}.select (\{keyVal})");
 
-        List<Comparable[]> rows = new ArrayList<>();
+        List <Comparable []> rows = new ArrayList <> ();
 
-        if (index == null) {
-            out.println("Index is null, cannot perform indexed select.");
-        } else {
-            Comparable[] row = index.get(keyVal);
-            if (row != null) {
-                rows.add(row);
-            }
-        }
+        //  T O   B E   I M P L E M E N T E D  - Project 2
 
-        return new Table(name + count++, attribute, domain, key, rows);
+        return new Table (name + count++, attribute, domain, key, rows);
     } // select
 
     /************************************************************************************
@@ -308,7 +298,7 @@ public class Table
      */
     public Table union (Table table2)
     {
-        out.println ("RA> \{name}.union (\{table2.name})");
+        out.println (STR."RA> \{name}.union (\{table2.name})");
         if (! compatible (table2)) return null;
 
         List <Comparable []> rows = new ArrayList <> ();
@@ -329,7 +319,7 @@ public class Table
      */
     public Table minus (Table table2)
     {
-        out.println ("RA> \{name}.minus (\{table2.name})");
+        out.println (STR."RA> \{name}.minus (\{table2.name})");
         if (! compatible (table2)) return null;
 
         List <Comparable []> rows = new ArrayList <> ();
@@ -352,131 +342,42 @@ public class Table
      * @param table2       the rhs table in the join operation
      * @return  a table with tuples satisfying the equality predicate
      */
-     public Table join(String attributes1, String attributes2, Table table2) {
-        out.println("RA> {" + name + "}.join (" + attributes1 + ", " + attributes2 + ", " + table2.name + ")");
+    public Table join (String attributes1, String attributes2, Table table2)
+    {
+        out.println (STR."RA> \{name}.join (\{attributes1}, \{attributes2}, \{table2.name})");
 
-        // Split the attribute strings into arrays of attribute names
-        var t_attrs = attributes1.split(" ");
-        var u_attrs = attributes2.split(" ");
-        var rows = new ArrayList<Comparable[]>();  // List to hold the joined rows
+        var t_attrs = attributes1.split (" ");
+        var u_attrs = attributes2.split (" ");
+        var rows    = new ArrayList <Comparable []> ();
 
-        // Perform the nested loop join
-        for (var row1 : this.tuples) {  // Loop through each row in the current table
-            for (var row2 : table2.tuples) {  // Loop through each row in the rhs table (table2)
-                boolean match = true;  // Flag to determine if a join condition is met
+        //  T O   B E   I M P L E M E N T E D 
 
-                // Check if all specified attributes match
-                for (int i = 0; i < t_attrs.length; i++) {
-                    int index1 = this.col(t_attrs[i]);  // Find index of attribute in this table
-                    int index2 = table2.col(u_attrs[i]);  // Find index of attribute in table2
+        return new Table (name + count++, concat (attribute, table2.attribute),
+                                          concat (domain, table2.domain), key, rows);
+    } // join
 
-                    // Compare the attribute values; if they don't match, set match to false
-                    if (!row1[index1].equals(row2[index2])) {
-                        match = false;
-                        break;
-                    }
-                }
-
-                // If all attributes match, concatenate the rows and add to result
-                if (match) {
-                    Comparable[] combinedRow = concat(row1, row2);  // Concatenate the matching rows
-                    rows.add(combinedRow);  // Add the concatenated row to the result list
-                }
-            }
-        }
-
-        // Return a new Table with the combined attributes, domains, and rows
-        return new Table(name + count++, concat(attribute, table2.attribute),
-                concat(domain, table2.domain), key, rows);
-    }
-    // join
-
-    
     /************************************************************************************
      * Join this table and table2 by performing a "theta-join".  Tuples from both tables
      * are compared attribute1 <op> attribute2.  Disambiguate attribute names by appending "2"
      * to the end of any duplicate attribute name.  Implement using a Nested Loop Join algorithm.
      *
      * #usage movie.join ("studioName == name", studio)
-     *
+     * 
      * @param condition  the theta join condition
      * @param table2     the rhs table in the join operation
      * @return  a table with tuples satisfying the condition
      */
-    public Table join(String condition, Table table2) {
-        out.println("RA> " + name + ".join (" + condition + ", " + table2.name + ")");
+    public Table join (String condition, Table table2)
+    {
+        out.println (STR."RA> \{name}.join (\{condition}, \{table2.name})");
 
-        // Split the condition into parts, assuming the condition is in the form "attribute1 <op> attribute2"
-        String[] conditionParts = condition.split(" ");
-        String attribute1 = conditionParts[0];
-        
-        String operator = conditionParts[1];
-        String attribute2 = conditionParts[2];
+        var rows = new ArrayList <Comparable []> ();
 
-        // Get attribute indexes in both tables
-        int index1 = this.getAttributeIndex(attribute1);
-        int index2 = table2.getAttributeIndex(attribute2);
+        //  T O   B E   I M P L E M E N T E D
 
-        // Handle duplicate attribute names by appending "2" for table2 attributes
-        String[] newAttributes = concat(this.attribute, table2.attribute, table2.name);
-
-        // Result table rows
-        var rows = new ArrayList<Comparable[]>();
-
-        // Nested loop join
-        for (Comparable[] row1 : this.tuples) {
-            for (Comparable[] row2 : table2.tuples) {
-                // Compare the values based on the given operator
-                if (compare(row1[index1], operator, row2[index2])) {
-                    // Concatenate the two rows and add to result
-                    rows.add(concat(row1, row2));
-                }
-            }
-        }
-
-        // Return a new table with the joined rows
-        return new Table(name + count++, newAttributes, concat(this.domain, table2.domain), this.key, rows);
-    }
-
-    // Helper method to find the index of an attribute in the table
-    private int getAttributeIndex(String attributeName) {
-        for (int i = 0; i < attribute.length; i++) {
-            if (attribute[i].equals(attributeName)) {
-                return i;
-            }
-        }
-        throw new IllegalArgumentException("Attribute not found: " + attributeName);
-    }
-
-    // Helper method to compare two values based on the operator
-    private boolean compare(Comparable value1, String operator, Comparable value2) {
-        switch (operator) {
-            case "==":
-                return value1.compareTo(value2) == 0;
-            case "!=":
-                return value1.compareTo(value2) != 0;
-            case "<":
-                return value1.compareTo(value2) < 0;
-            case "<=":
-                return value1.compareTo(value2) <= 0;
-            case ">":
-                return value1.compareTo(value2) > 0;
-            case ">=":
-                return value1.compareTo(value2) >= 0;
-            default:
-                throw new IllegalArgumentException("Unsupported operator: " + operator);
-        }
-    }
-
-    // Helper method to concatenate two arrays of attributes, appending "2" to table2 attributes
-    private String[] concat(String[] attr1, String[] attr2, String table2Name) {
-        String[] result = new String[attr1.length + attr2.length];
-        System.arraycopy(attr1, 0, result, 0, attr1.length);
-        for (int i = 0; i < attr2.length; i++) {
-            result[attr1.length + i] = attr2[i] + (Arrays.asList(attr1).contains(attr2[i]) ? "2" : "");
-        }
-        return result;
-    }
+        return new Table (name + count++, concat (attribute, table2.attribute),
+                                          concat (domain, table2.domain), key, rows);
+    } // join
 
     /************************************************************************************
      * Join this table and table2 by performing an "equi-join".  Same as above equi-join,
@@ -505,63 +406,18 @@ public class Table
      * @param table2  the rhs table in the join operation
      * @return  a table with tuples satisfying the equality predicate
      */
-    public Table join(Table table2) {
-        //out.println("RA> \{name}.join (\{table2.name})");
+    public Table join (Table table2)
+    {
+        out.println (STR."RA> \{name}.join (\{table2.name})");
 
-       // out.println("Here are the tables");
-       // out.println(table2.tuples);
-       // out.println(this.tuples);
+        var rows = new ArrayList <Comparable []> ();
 
-        var rows = new ArrayList<Comparable[]>();
+        //  T O   B E   I M P L E M E N T E D 
 
-        // Step 1: Identify common attributes
-        List<String> commonAttributes = new ArrayList<>();
-        for (String attr : attribute) {
-            for (String attr1 : table2.attribute) {
-                if (attr.equals(attr1)) {
-                    commonAttributes.add(attr);
-                }
-            }
-        }
-
-        // Step 2: Perform join operation
-        for (Comparable[] row1 : this.tuples) {
-            for (Comparable[] row2 : table2.tuples) {
-                boolean match = true;
-                for (String attr : commonAttributes) {
-                    int index1 = this.col(attr);
-                    int index2 = table2.col(attr);
-                    if (!row1[index1].equals(row2[index2])) {
-                        match = false;
-                        break;
-                    }
-                }
-                if (match) {
-                    // Combine row1 and row2 into a new tuple without eliminating duplicates
-                    Comparable[] mergedRow = new Comparable[row1.length + row2.length];
-                    int k = 0;
-
-                    for (Comparable value : row1) {
-                        mergedRow[k++] = value;
-                    }
-
-                    for (Comparable value : row2) {
-                        mergedRow[k++] = value;
-                    }
-
-                    rows.add(mergedRow);
-                }
-            }
-        }
-
-        // Step 3: Create new attributes and domains for the resulting table
-        String[] newAttributes = concat(attribute, table2.attribute);
-        Class[] newDomains = concat(domain, table2.domain);
-
-        // Step 4: Return the new table with combined schema
-        return new Table(name + count++, newAttributes, newDomains, key, rows);
+        // FIX - eliminate duplicate columns
+        return new Table (name + count++, concat (attribute, table2.attribute),
+                                          concat (domain, table2.domain), key, rows);
     } // join
-
 
     /************************************************************************************
      * Return the column position for the given attribute name or -1 if not found.
@@ -588,7 +444,7 @@ public class Table
      */
     public int insert (Comparable [] tup)
     {
-        out.println ("DML> insert into \{name} values (\{Arrays.toString (tup)})");
+        out.println (STR."DML> insert into \{name} values (\{Arrays.toString (tup)})");
 
         if (typeCheck (tup)) {
             tuples.add (tup);
@@ -639,7 +495,7 @@ public class Table
      */
     public void print ()
     {
-        out.println ("\n Table \{name}");
+        out.println (STR."\n Table \{name}");
         out.print ("|-");
         out.print ("---------------".repeat (attribute.length));
         out.println ("-|");
@@ -660,11 +516,11 @@ public class Table
      */
     public void printIndex ()
     {
-        out.println ("\n Index for \{name}");
+        out.println (STR."\n Index for \{name}");
         out.println ("-------------------");
         if (mType != MapType.NO_MAP) {
             for (var e : index.entrySet ()) {
-                out.println ("\{e.getKey ()} -> \{Arrays.toString (e.getValue ())}");
+                out.println (STR."\{e.getKey ()} -> \{Arrays.toString (e.getValue ())}");
             } // for
         } // if
         out.println ("-------------------");
@@ -726,7 +582,7 @@ public class Table
         } // if
         for (var j = 0; j < domain.length; j++) {
             if (domain [j] != table2.domain [j]) {
-                out.println ("compatible ERROR: tables disagree on domain \{j}");
+                out.println (STR."compatible ERROR: tables disagree on domain \{j}");
                 return false;
             } // if
         } // for
@@ -751,7 +607,7 @@ public class Table
                     colPos [j] = k;
                 } // for
             } // for
-            if ( ! matched) out.println ("match: domain not found for \{column [j]}");
+            if ( ! matched) out.println (STR."match: domain not found for \{column [j]}");
         } // for
 
         return colPos;
@@ -799,9 +655,9 @@ public class Table
 
         for (var i = 0; i < className.length; i++) {
             try {
-                classArray [i] = Class.forName ("java.lang.\{className [i]}");
+                classArray [i] = Class.forName (STR."java.lang.\{className [i]}");
             } catch (ClassNotFoundException ex) {
-                out.println ("findClass: \{ex}");
+                out.println (STR."findClass: \{ex}");
             } // try
         } // for
 

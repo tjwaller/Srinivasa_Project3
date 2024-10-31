@@ -48,6 +48,9 @@ public class TableTest {
             // Define a condition for the select operation
             String condition = "grade >= 100000";
 
+            // Define a contition for the join operation
+            String conditionJoin = "id == id";
+
             // Test the select method and log the performance
             System.out.println("\nTesting: select(String condition)");
             testSelectMethod(table1, condition);
@@ -55,6 +58,9 @@ public class TableTest {
             // Test the join method and log the performance
             System.out.println("\nTesting: join(Table table2)");
             testJoinMethod(table1, table2);
+
+            System.out.println("\nTesting: theta(Table table2)");
+            testThetaJoinMethod(table1, table2, conditionJoin);
 
             // Test the select by key method and log the performance
             System.out.println("\nTesting: select(KeyType keyVal)");
@@ -134,6 +140,21 @@ public class TableTest {
         for (int i = 0; i < iterations + 1; i++) {
             long startTime = System.nanoTime();
             table1.join(table2);
+            long endTime = System.nanoTime();
+            if (i > 0) {
+                totalTime += (endTime - startTime);
+            }
+        }
+        long averageTime = totalTime / iterations;
+        System.out.println("Average time for join with " + table1.getName() + " and " + table2.getName() + ": " + averageTime + " ns");
+    }
+
+    private static void testThetaJoinMethod(Table table1, Table table2, String condition) {
+        int iterations = 5;
+        long totalTime = 0;
+        for (int i = 0; i < iterations + 1; i++) {
+            long startTime = System.nanoTime();
+            table1.join(condition, table2);
             long endTime = System.nanoTime();
             if (i > 0) {
                 totalTime += (endTime - startTime);
