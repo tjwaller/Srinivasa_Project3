@@ -163,7 +163,7 @@ public class Table
     {
         this (_name, attributes.split (" "), findClass (domains.split (" ")), _key.split(" "));
 
-        out.println ("DDL> create table \{name} (\{attributes})");
+        out.println (STR."DDL> create table \{name} (\{attributes})");
     } // constructor
 
     //----------------------------------------------------------------------------------
@@ -203,7 +203,7 @@ public class Table
      */
     public Table select (Predicate <Comparable []> predicate)
     {
-        out.println ("RA> \{name}.select (\{predicate})");
+        out.println (STR."RA> \{name}.select (\{predicate})");
 
         return new Table (name + count++, attribute, domain, key,
                    tuples.stream ().filter (t -> predicate.test (t))
@@ -282,7 +282,7 @@ public class Table
      * @return  a table with the tuple satisfying the key predicate
      */
     public Table select(KeyType keyVal) {
-        out.println("RA> \{name}.select (\{keyVal})");
+        out.println(STR."RA> \{name}.select (\{keyVal})");
 
         List<Comparable[]> rows = new ArrayList<>();
 
@@ -308,7 +308,7 @@ public class Table
      */
     public Table union (Table table2)
     {
-        out.println ("RA> \{name}.union (\{table2.name})");
+        out.println (STR."RA> \{name}.union (\{table2.name})");
         if (! compatible (table2)) return null;
 
         List <Comparable []> rows = new ArrayList <> ();
@@ -329,7 +329,7 @@ public class Table
      */
     public Table minus (Table table2)
     {
-        out.println ("RA> \{name}.minus (\{table2.name})");
+        out.println (STR."RA> \{name}.minus (\{table2.name})");
         if (! compatible (table2)) return null;
 
         List <Comparable []> rows = new ArrayList <> ();
@@ -588,7 +588,7 @@ public class Table
      */
     public int insert (Comparable [] tup)
     {
-        out.println ("DML> insert into \{name} values (\{Arrays.toString (tup)})");
+        out.println (STR."DML> insert into \{name} values (\{Arrays.toString (tup)})");
 
         if (typeCheck (tup)) {
             tuples.add (tup);
@@ -639,7 +639,7 @@ public class Table
      */
     public void print ()
     {
-        out.println ("\n Table \{name}");
+        out.println (STR."\n Table \{name}");
         out.print ("|-");
         out.print ("---------------".repeat (attribute.length));
         out.println ("-|");
@@ -660,11 +660,11 @@ public class Table
      */
     public void printIndex ()
     {
-        out.println ("\n Index for \{name}");
+        out.println (STR."\n Index for \{name}");
         out.println ("-------------------");
         if (mType != MapType.NO_MAP) {
             for (var e : index.entrySet ()) {
-                out.println ("\{e.getKey ()} -> \{Arrays.toString (e.getValue ())}");
+                out.println (STR."\{e.getKey ()} -> \{Arrays.toString (e.getValue ())}");
             } // for
         } // if
         out.println ("-------------------");
@@ -726,7 +726,7 @@ public class Table
         } // if
         for (var j = 0; j < domain.length; j++) {
             if (domain [j] != table2.domain [j]) {
-                out.println ("compatible ERROR: tables disagree on domain \{j}");
+                out.println (STR."compatible ERROR: tables disagree on domain \{j}");
                 return false;
             } // if
         } // for
@@ -751,7 +751,7 @@ public class Table
                     colPos [j] = k;
                 } // for
             } // for
-            if ( ! matched) out.println ("match: domain not found for \{column [j]}");
+            if ( ! matched) out.println (STR."match: domain not found for \{column [j]}");
         } // for
 
         return colPos;
@@ -799,9 +799,9 @@ public class Table
 
         for (var i = 0; i < className.length; i++) {
             try {
-                classArray [i] = Class.forName ("java.lang.\{className [i]}");
+                classArray [i] = Class.forName (STR."java.lang.\{className [i]}");
             } catch (ClassNotFoundException ex) {
-                out.println ("findClass: \{ex}");
+                out.println (STR."findClass: \{ex}");
             } // try
         } // for
 
