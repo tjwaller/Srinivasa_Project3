@@ -1,4 +1,4 @@
-# Term Project 2: Indexing
+# Term Project 3: Performance Comparison
 
 This project builds on the relational algebra operations with indexing introduced in Project 2. In Project 3, we aim to analyze the performance of various indexing techniques by comparing different data structures used as indices. This evaluation will focus on Select and Join operations, using the tuple generator to create large datasets and benchmark runtime performance.
 
